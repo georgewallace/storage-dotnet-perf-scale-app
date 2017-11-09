@@ -1,3 +1,4 @@
+Start-Transcript
 ## Install .NET Core 2.0
 Invoke-WebRequest "https://dot.net/v1/dotnet-install.ps1" -OutFile "./dotnet-install.ps1" 
 ./dotnet-install.ps1 -Channel 2.0 -InstallDir c:\dotnet
@@ -37,6 +38,11 @@ $NewPath=$OldPath+';'+$dotnetpath
 Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment' -Name PATH -Value $NewPath
 }
 
+if($args)
+{
+Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment' -Name storageconnectionstring -Value "DefaultEndpointsProtocol=http;AccountName='$args[0]';AccountKey='$args[0]'";
+}
+
 # Create 32 1GB files to be used for the sample
 New-Item -ItemType Directory D:\git\StoragePerfandScalabilityExample\upload
 Set-Location D:\git\StoragePerfandScalabilityExample\upload
@@ -48,5 +54,5 @@ $out = new-object byte[] 1073741824;
 [IO.File]::WriteAllBytes("D:\git\StoragePerfandScalabilityExample\upload\$([guid]::NewGuid().ToString()).txt", $out)
 }
 
-
+Stop-Transcript
 
