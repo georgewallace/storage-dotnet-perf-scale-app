@@ -213,7 +213,7 @@
     },
     "rdpCommand": {
       "type": "string",
-      "value": "[concat('mstsc ', '/v:, reference(variables('publicIPAddressName')).dnsSettings.fqdn)]"
+      "value": "[concat('mstsc ', '/v:', reference(variables('publicIPAddressName')).dnsSettings.fqdn)]"
     }
   }
 }
