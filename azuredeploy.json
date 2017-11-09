@@ -155,7 +155,7 @@
           "imageReference": {
             "publisher": "[variables('imagePublisher')]",
             "offer": "[variables('imageOffer')]",
-            "sku": "[parameters('ubuntuOSVersion')]",
+            "sku": "[parameters('OSVersion')]",
             "version": "latest"
           },
           "osDisk": {
@@ -199,9 +199,9 @@
         "autoUpgradeMinorVersion": true,
         "settings": {
           "fileUris": [
-            "https://raw.githubusercontent.com/seguler/azuredeploytest/master/setup_env.sh"
+            "https://raw.githubusercontent.com/georgewallace/storage-dotnet-perf-scale-app/master/setup_env.ps1"
           ],
-			"commandToExecute": "[concat('sh setup_env.sh ', parameters('adminUsername'), ' ', variables('storageAccountName'), ' ', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]"
+			"commandToExecute": "[concat('powershell.exe setup_env.ps1 ', variables('storageAccountName'), ' ', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]"
         }
       }
 	}
@@ -211,9 +211,9 @@
       "type": "string",
       "value": "[reference(variables('publicIPAddressName')).dnsSettings.fqdn]"
     },
-    "sshCommand": {
+    "rdpCommand": {
       "type": "string",
-      "value": "[concat('ssh ', parameters('adminUsername'), '@', reference(variables('publicIPAddressName')).dnsSettings.fqdn)]"
+      "value": "[concat('mstsc ', '/v:, reference(variables('publicIPAddressName')).dnsSettings.fqdn)]"
     }
   }
 }
