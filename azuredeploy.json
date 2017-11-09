@@ -34,12 +34,12 @@
         "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
       }
     },
-    "ubuntuOSVersion": {
+    "OSVersion": {
       "type": "string",
-      "defaultValue": "16.10-DAILY",
+      "defaultValue": "2016-Datacenter",
       "allowedValues": [
-        "16.04.0-LTS",
-		"16.10-DAILY"
+        "2012-Datacenter",
+		"2016-Datacenter"
       ],
       "metadata": {
         "description": "The Ubuntu version for the VM. This will pick a fully patched image of this given Ubuntu version."
