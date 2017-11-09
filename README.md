@@ -4,7 +4,7 @@
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
 
-1. Click Deploy button to deploy the sample to a Linux VM on Azure
+1. Click Deploy button to deploy the sample to a Windows VM on Azure
 2. Once deployment is completed, connect to the VM via RDP using the administrator account you defined. You will have 50 files each 1GB in the D: directory as sample data.
 3. Navigate to the sample application in D:\git\storage-dotnet-perf-scale-app
 `cd d:\git\storage-dotnet-perf-scale-app`
