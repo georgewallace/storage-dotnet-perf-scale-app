@@ -70,7 +70,7 @@ namespace AzPerf
         {
             // Load the connection string for use with the application. The storage connection string is stored
             // in an environment variable on the machine running the application.
-            string storage_connection_string = Environment.GetEnvironmentVariable("storageconnectionstring",EnvironmentVariableTarget.Machine);
+            string storage_connection_string = Environment.GetEnvironmentVariable("storageconnectionstring", EnvironmentVariableTarget.Machine);
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse(storage_connection_string);
             CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
             IRetryPolicy exponentialRetryPolicy = new ExponentialRetry(TimeSpan.FromSeconds(2), 10);
@@ -176,7 +176,7 @@ namespace AzPerf
                 int count = 0;
                 int max_outstanding = 100;
                 int completed_count = 0;
-                
+
                 // Create a new instance of the semaphore class to define the number of threads to use in the application.
                 Semaphore sem = new Semaphore(max_outstanding, max_outstanding);
 
@@ -199,7 +199,8 @@ namespace AzPerf
                     // This includes defining an exponential retry policy to ensure that failed connections are retried with a backoff policy. As multiple large files are being uploaded
                     // large block sizes this can cause an issue if an exponential retry policy is not defined.  Additionally parallel operations are enabled with a thread count of 8
                     // This could be should be multiple of the number of cores that the machine has. Lastly MD5 hash validation is disabled, this imroves the upload speed.
-                    tasks.Add(blockBlob.UploadFromFileAsync(fileName, null, new BlobRequestOptions() { ParallelOperationThreadCount = 8, DisableContentMD5Validation = true, StoreBlobContentMD5 = false }, null).ContinueWith((t) => {
+                    tasks.Add(blockBlob.UploadFromFileAsync(fileName, null, new BlobRequestOptions() { ParallelOperationThreadCount = 8, DisableContentMD5Validation = true, StoreBlobContentMD5 = false }, null).ContinueWith((t) =>
+                    {
                         sem.Release();
                         Interlocked.Increment(ref completed_count);
                     }));
@@ -258,11 +259,11 @@ namespace AzPerf
                             foreach (var blobItem in resultSegment.Results)
                             {
                                 if (((CloudBlob)blobItem).Properties.BlobType == BlobType.BlockBlob)
-                                { 
-                                // Get the blob and add a task to download the blob asynchronously from the storage account.
-                                CloudBlockBlob blockBlob = container.GetBlockBlobReference(((CloudBlockBlob)blobItem).Name);
-                                Console.WriteLine("Starting download of {0} from container {1}", blockBlob.Name, container.Name);
-                                tasks.Add(blockBlob.DownloadToFileAsync(directory.FullName + "\\" + blockBlob.Name, FileMode.Create, null, new BlobRequestOptions() { DisableContentMD5Validation = true, StoreBlobContentMD5 = false }, null));
+                                {
+                                    // Get the blob and add a task to download the blob asynchronously from the storage account.
+                                    CloudBlockBlob blockBlob = container.GetBlockBlobReference(((CloudBlockBlob)blobItem).Name);
+                                    Console.WriteLine("Starting download of {0} from container {1}", blockBlob.Name, container.Name);
+                                    tasks.Add(blockBlob.DownloadToFileAsync(directory.FullName + "\\" + blockBlob.Name, FileMode.Create, null, new BlobRequestOptions() { DisableContentMD5Validation = true, StoreBlobContentMD5 = false }, null));
                                 }
                             }
                         }
