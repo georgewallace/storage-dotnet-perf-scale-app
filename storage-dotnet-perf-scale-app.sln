@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27004.2002
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StoragePerfandScalabilityExample", "StoragePerfandScalabilityExample.csproj", "{A9ADB6E6-B501-43D2-81D8-4E8B33824CC4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "storage-dotnet-perf-scale-app", "storage-dotnet-perf-scale-app.csproj", "{A9ADB6E6-B501-43D2-81D8-4E8B33824CC4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
