@@ -40,7 +40,7 @@ Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\E
 
 if($args)
 {
-Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment' -Name storageconnectionstring -Value "DefaultEndpointsProtocol=https;AccountName='$($args[0])';AccountKey=$($args[1]);EndpointSuffix=core.windows.net";
+Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment' -Name storageconnectionstring -Value "DefaultEndpointsProtocol=https;AccountName=$($args[0]);AccountKey=$($args[1]);EndpointSuffix=core.windows.net";
 }
 
 # Create 32 1GB files to be used for the sample
