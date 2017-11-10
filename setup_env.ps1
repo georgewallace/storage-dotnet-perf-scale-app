@@ -1,3 +1,4 @@
+Start-Transcript
 ## Install .NET Core 2.0
 Invoke-WebRequest "https://dot.net/v1/dotnet-install.ps1" -OutFile "./dotnet-install.ps1" 
 ./dotnet-install.ps1 -Channel 2.0 -InstallDir c:\dotnet
@@ -17,10 +18,10 @@ choco install git -y
 New-Item -ItemType Directory -Path D:\git -Force
 Set-Location D:\git
 Write-host "cloning repo"
-& 'C:\Program Files\git\cmd\git.exe' clone https://github.com/georgewallace/StoragePerfandScalabilityExample
+& 'C:\Program Files\git\cmd\git.exe' clone https://github.com/georgewallace/storage-dotnet-perf-scale-app
 
 write-host "Changing directory to $((Get-Item -Path ".\" -Verbose).FullName)"
-Set-Location D:\git\StoragePerfandScalabilityExample
+Set-Location D:\git\storage-dotnet-perf-scale-app
 
 # Restore NuGet packages and build applocation
 Write-host "restoring nuget packages"
@@ -37,16 +38,21 @@ $NewPath=$OldPath+';'+$dotnetpath
 Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment' -Name PATH -Value $NewPath
 }
 
+if($args)
+{
+Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment' -Name storageconnectionstring -Value "DefaultEndpointsProtocol=https;AccountName=$($args[0]);AccountKey=$($args[1]);EndpointSuffix=core.windows.net";
+}
+
 # Create 32 1GB files to be used for the sample
-New-Item -ItemType Directory D:\git\StoragePerfandScalabilityExample\upload
-Set-Location D:\git\StoragePerfandScalabilityExample\upload
+New-Item -ItemType Directory D:\git\storage-dotnet-perf-scale-app\upload
+Set-Location D:\git\storage-dotnet-perf-scale-app\upload
 Write-host "Creating files"
 for($i=0; $i -lt 32; $i++)
 {
 $out = new-object byte[] 1073741824; 
 (new-object Random).NextBytes($out); 
-[IO.File]::WriteAllBytes("D:\git\StoragePerfandScalabilityExample\upload\$([guid]::NewGuid().ToString()).txt", $out)
+[IO.File]::WriteAllBytes("D:\git\storage-dotnet-perf-scale-app\upload\$([guid]::NewGuid().ToString()).txt", $out)
 }
 
-
+Stop-Transcript
 

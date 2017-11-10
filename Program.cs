@@ -70,7 +70,7 @@ namespace AzPerf
         {
             // Load the connection string for use with the application. The storage connection string is stored
             // in an environment variable on the machine running the application.
-            string storage_connection_string = Environment.GetEnvironmentVariable("storageconnectionstring");
+            string storage_connection_string = Environment.GetEnvironmentVariable("storageconnectionstring",EnvironmentVariableTarget.Machine);
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse(storage_connection_string);
             CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
             IRetryPolicy exponentialRetryPolicy = new ExponentialRetry(TimeSpan.FromSeconds(2), 10);
