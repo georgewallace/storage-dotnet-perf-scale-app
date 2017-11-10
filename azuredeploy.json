@@ -47,7 +47,7 @@
     }
   },
   "variables": {
-    "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'salinuxvm')]",
+    "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'sawinvm')]",
     "imagePublisher": "MicrosoftWindowsServer",
     "imageOffer": "WindowsServer",
     "nicName": "myVMNic",
