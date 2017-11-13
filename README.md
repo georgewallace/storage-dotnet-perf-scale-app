@@ -10,3 +10,5 @@
 `cd d:\git\storage-dotnet-perf-scale-app`
 4. Run the application to upload the files to Azure Storage from the folder
 `dotnet run`
+
+When done with the sample, remember to delete the VM to ensure you do not continue to get charged for the VM.
