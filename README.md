@@ -22,4 +22,4 @@ This is an <a href="http://azure.microsoft.com/en-us/services/storage/">Azure st
 6. Re-build the application by running `dotnet build`.
 7. Re-run the application by running `dotnet run`
 
-When done with the sample, remember to delete the VM to ensure you do not continue to get charged for the VM.
+When done with the sample, remember to delete the VM and resource group to ensure you do not continue to get charged.
