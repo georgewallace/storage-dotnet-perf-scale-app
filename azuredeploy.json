@@ -6,11 +6,11 @@
       "type": "string",
       "defaultValue": "Standard_DS14_v2",
       "allowedValues": [
-	    "Standard_DS1_v2",
-        	"Standard_DS4_v2",
-		"Standard_DS14_v2",
-	      "Standard_D14_v2_Promo",
-		"Standard_L32s"
+        "Standard_DS1_v2",
+        "Standard_DS4_v2",
+        "Standard_DS14_v2",
+        "Standard_D14_v2_Promo",
+        "Standard_L32s"
       ],
       "metadata": {
         "description": "Select the Virtual Machine size."
@@ -39,10 +39,10 @@
       "defaultValue": "2016-Datacenter",
       "allowedValues": [
         "2012-Datacenter",
-		"2016-Datacenter"
+        "2016-Datacenter"
       ],
       "metadata": {
-        "description": "The Ubuntu version for the VM. This will pick a fully patched image of this given Ubuntu version."
+        "description": "The Windows version for the VM. This will pick a fully patched image of this given Windows version."
       }
     }
   },
@@ -184,7 +184,7 @@
         }
       }
     },
-	{
+    {
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[concat(variables('vmName'),'/installenvironment')]",
       "apiVersion": "2015-05-01-preview",
@@ -193,18 +193,18 @@
         "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
       ],
       "properties": {
-"publisher": "Microsoft.Compute",
-            "type": "CustomScriptExtension",
-            "typeHandlerVersion": "1.4",
-            "autoUpgradeMinorVersion": true,
+        "publisher": "Microsoft.Compute",
+        "type": "CustomScriptExtension",
+        "typeHandlerVersion": "1.4",
+        "autoUpgradeMinorVersion": true,
         "settings": {
           "fileUris": [
             "https://raw.githubusercontent.com/georgewallace/storage-dotnet-perf-scale-app/master/setup_env.ps1"
           ],
-			"commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file setup_env.ps1 ', variables('storageAccountName'), ' ', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]"
+          "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file setup_env.ps1 ', variables('storageAccountName'), ' ', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]"
         }
       }
-	}
+    }
   ],
   "outputs": {
     "hostname": {

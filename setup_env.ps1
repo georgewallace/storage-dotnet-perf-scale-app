@@ -43,11 +43,11 @@ if($args)
 Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment' -Name storageconnectionstring -Value "DefaultEndpointsProtocol=https;AccountName=$($args[0]);AccountKey=$($args[1]);EndpointSuffix=core.windows.net";
 }
 
-# Create 32 1GB files to be used for the sample
+# Create 50 1GB files to be used for the sample
 New-Item -ItemType Directory D:\git\storage-dotnet-perf-scale-app\upload
 Set-Location D:\git\storage-dotnet-perf-scale-app\upload
 Write-host "Creating files"
-for($i=0; $i -lt 32; $i++)
+for($i=0; $i -lt 50; $i++)
 {
 $out = new-object byte[] 1073741824; 
 (new-object Random).NextBytes($out); 

@@ -37,13 +37,13 @@ $vmConfig = New-AzureRmVMConfig -VMName myVM -VMSize Standard_DS14_v2 | `
 
 
 
-    New-AzureRmVM -ResourceGroupName $resourcegroup -Location $location -VM $vmConfig
+New-AzureRmVM -ResourceGroupName $resourcegroup -Location $location -VM $vmConfig
 
-        Set-AzureRMVMCustomScriptExtension -ResourceGroupName $resourcegroup `
-    -VMName myVM `
-    -Location $location `
-    -FileUri https://raw.githubusercontent.com/georgewallace/StoragePerfandScalabilityExample/master/script.ps1 `
-    -Run 'script.ps1' `
-    -Name DemoScriptExtension
+    Set-AzureRMVMCustomScriptExtension -ResourceGroupName $resourcegroup `
+-VMName myVM `
+-Location $location `
+-FileUri https://raw.githubusercontent.com/georgewallace/storage-dotnet-perf-scale-app/master/script.ps1 `
+-Run 'script.ps1' `
+-Name DemoScriptExtension
 
 Write-host "Your public IP address is $($pip.Ipaddress)"

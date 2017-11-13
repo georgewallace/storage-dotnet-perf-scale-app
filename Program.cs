@@ -1,7 +1,7 @@
 ﻿//------------------------------------------------------------------------------
 //MIT License
 
-//Copyright(c) 2017 George Wallace
+//Copyright(c) 2017 Microsoft Corp.
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files (the "Software"), to deal
@@ -116,7 +116,7 @@ namespace AzPerf
                 UploadFilesAsync().Wait();
 
                 // Uncomment the following line to enable downloading of files from the storage account.  This is commented out
-                // initially to support the tutorial at http://inserturlhere.
+                // initially to support the tutorial at https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-scaleable-app-download-files.
                 // DownloadFilesAsync().Wait();
             }
             catch (AggregateException ae)
@@ -141,7 +141,7 @@ namespace AzPerf
                 Console.ReadKey();
 
                 // The following function will delete the container and all files contained in them.  This is commented out initialy
-                // As the tutorial at http://inserturlhere has you upload only for one tutorial and download for the other. 
+                // As the tutorial at https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-scaleable-app-download-files has you upload only for one tutorial and download for the other. 
                 // DeleteExistingContainersAsync().Wait();
             }
         }
