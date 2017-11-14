@@ -1,7 +1,7 @@
 ﻿//------------------------------------------------------------------------------
 //MIT License
 
-//Copyright(c) 2017 Microsoft Corp.
+//Copyright(c) 2017 Microsoft Corporation. All rights reserved.
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files (the "Software"), to deal
@@ -69,9 +69,11 @@ namespace AzPerf
         public static CloudBlobClient GetCloudBlobClient()
         {
             // Load the connection string for use with the application. The storage connection string is stored
-            // in an environment variable on the machine running the application.
+            // in an environment variable on the machine running the application called storageconnectionstring.
+            // If the environment variable is created after the application is launched in a console or with Visual
+            // studio the shell needs to be closed and reloaded to take the environment variable into account.
             string storage_connection_string = Environment.GetEnvironmentVariable("storageconnectionstring", EnvironmentVariableTarget.Machine);
-            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(storage_connection_string);
+            CloudStorageAccount storageAccount = CloudStorageAccount.Parse("DefaultEndpointsProtocol=https;AccountName=mystorageaccount321ewq;AccountKey=p89kSsR5BS6FhFbYfB6VTjEwSb4MsnBPgWCtwtKgcw+19/Uaktw97pcFZJzkiu6WjuhH6Vvr6fmTtopAIo2baA==;EndpointSuffix=core.windows.net");
             CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
             IRetryPolicy exponentialRetryPolicy = new ExponentialRetry(TimeSpan.FromSeconds(2), 10);
             blobClient.DefaultRequestOptions.RetryPolicy = exponentialRetryPolicy;
@@ -95,7 +97,7 @@ namespace AzPerf
                 }
                 catch (StorageException)
                 {
-                    Console.WriteLine("If you are running with the default configuration please make sure you have started the storage emulator. Press the Windows key and type Azure Storage to select and run it from the list of applications - then restart the sample.");
+                    Console.WriteLine("If you are using the storage emulator, please make sure you have started it. Press the Windows key and type Azure Storage to select and run it from the list of applications - then restart the sample.");
                     Console.ReadLine();
                     throw;
                 }
@@ -114,7 +116,7 @@ namespace AzPerf
             try
             {
                 // Call the UploadFilesAsync function.
-                UploadFilesAsync().Wait();
+                // UploadFilesAsync().Wait();
 
                 // Uncomment the following line to enable downloading of files from the storage account.  This is commented out
                 // initially to support the tutorial at https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-scaleable-app-download-files.
@@ -192,6 +194,8 @@ namespace AzPerf
                     string s = (r.Next() % 10000).ToString("X5");
                     Console.WriteLine("Uploading {0} as {1} to container {2}.", fileName, s, container.Name);
                     CloudBlockBlob blockBlob = container.GetBlockBlobReference(s);
+
+                    // Set block size to 100MB.
                     blockBlob.StreamWriteSizeInBytes = 100 * 1024 * 1024;
                     sem.WaitOne();
 
@@ -258,10 +262,12 @@ namespace AzPerf
                         do
                         {
                             // Return the blobs from the container lazily 10 at a time.
-                            resultSegment = await container.ListBlobsSegmentedAsync(string.Empty, true, BlobListingDetails.All, 10, continuationToken, null, null);
+                            resultSegment = await container.ListBlobsSegmentedAsync(null, true, BlobListingDetails.All, 10, continuationToken, null, null);
+                            continuationToken = resultSegment.ContinuationToken;
                             {
                                 foreach (var blobItem in resultSegment.Results)
                                 {
+
                                     if (((CloudBlob)blobItem).Properties.BlobType == BlobType.BlockBlob)
                                     {
                                         // Get the blob and add a task to download the blob asynchronously from the storage account.
