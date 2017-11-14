@@ -35,6 +35,9 @@ $storageAccount = New-AzureRmStorageAccount -ResourceGroupName $resourceGroup `
   -Kind Storage `
   -EnableEncryptionService Blob
 
+# Retrieve the storage account key for use in the custom script extension
+$storagekey = (Get-AzureRmStorageAccountKey -ResourceGroupName $resourcegroup -Name $storageaccount.StorageAccountName).Value[0]
+
 # Define a credential object
 $cred = Get-Credential
 
@@ -49,7 +52,7 @@ $vnet = New-AzureRmVirtualNetwork -ResourceGroupName $resourcegroup -Location $l
 $pip = New-AzureRmPublicIpAddress -ResourceGroupName $resourcegroup -Location $location `
     -AllocationMethod Static -IdleTimeoutInMinutes 4 -Name "mypublicdns$(Get-Random)"
 
-    # Create a virtual network card and associate with public IP address and NSG
+# Create a virtual network card and associate with public IP address and NSG
 $nic = New-AzureRmNetworkInterface -Name myNic -ResourceGroupName $resourcegroup -Location $location `
     -SubnetId $vnet.Subnets[0].Id -PublicIpAddressId $pip.Id 
 
@@ -60,14 +63,18 @@ $vmConfig = New-AzureRmVMConfig -VMName myVM -VMSize Standard_DS14_v2 | `
     -Skus 2016-Datacenter -Version latest | Add-AzureRmVMNetworkInterface -Id $nic.Id
 
 
-
+# Create the VM with the defined configuration
 New-AzureRmVM -ResourceGroupName $resourcegroup -Location $location -VM $vmConfig
 
-    Set-AzureRMVMCustomScriptExtension -ResourceGroupName $resourcegroup `
--VMName myVM `
--Location $location `
--FileUri https://raw.githubusercontent.com/georgewallace/storage-dotnet-perf-scale-app/master/script.ps1 `
--Run 'script.ps1' `
--Name DemoScriptExtension
+# Deploy the custom script extension to the VM, this custom script extension installs 
+# .NET core 2.0, git and its dependencies, clones the repo, configueres the connection string
+# environment variable and creates 50 1GB random files to use with the example on the D: drive.
+Set-AzureRMVMCustomScriptExtension -ResourceGroupName $resourcegroup `
+    -VMName myVM `
+    -Location $location `
+    -FileUri https://raw.githubusercontent.com/georgewallace/storage-dotnet-perf-scale-app/master/setup_env.ps1 `
+    -Run 'setup_env.ps1' `
+    -Name DemoScriptExtension `
+    -Argument "$($storageaccount.StorageAccountName) $storagekey" 
 
 Write-host "Your public IP address is $($pip.Ipaddress)"

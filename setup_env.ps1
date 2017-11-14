@@ -27,11 +27,11 @@ Start-Transcript
 Invoke-WebRequest "https://dot.net/v1/dotnet-install.ps1" -OutFile "./dotnet-install.ps1" 
 ./dotnet-install.ps1 -Channel 2.0 -InstallDir c:\dotnet
 
+# Install Post-Git
 Write-host "Installing Posh-Git"
 Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -force
 
-
-# Install chocolately 
+# Install chocolately to be able to install git
 Invoke-WebRequest 'https://chocolatey.org/install.ps1' -OutFile "./choco-install.ps1"
 ./choco-install.ps1
 
@@ -62,9 +62,10 @@ $NewPath=$OldPath+';'+$dotnetpath
 Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment' -Name PATH -Value $NewPath
 }
 
+# Configure the environment variable to store the connection string in.
 if($args)
 {
-Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment' -Name storageconnectionstring -Value "DefaultEndpointsProtocol=https;AccountName=$($args[0]);AccountKey=$($args[1]);EndpointSuffix=core.windows.net";
+Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment' -Name storageconnectionstring -Value "DefaultEndpointsProtocol=http;AccountName=$($args[0]);AccountKey=$($args[1]);EndpointSuffix=core.windows.net";
 }
 
 # Create 50 1GB files to be used for the sample

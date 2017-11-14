@@ -72,8 +72,8 @@ namespace AzPerf
             // in an environment variable on the machine running the application called storageconnectionstring.
             // If the environment variable is created after the application is launched in a console or with Visual
             // studio the shell needs to be closed and reloaded to take the environment variable into account.
-            string storage_connection_string = Environment.GetEnvironmentVariable("storageconnectionstring", EnvironmentVariableTarget.Machine);
-            CloudStorageAccount storageAccount = CloudStorageAccount.Parse("DefaultEndpointsProtocol=https;AccountName=mystorageaccount321ewq;AccountKey=p89kSsR5BS6FhFbYfB6VTjEwSb4MsnBPgWCtwtKgcw+19/Uaktw97pcFZJzkiu6WjuhH6Vvr6fmTtopAIo2baA==;EndpointSuffix=core.windows.net");
+            string storage_connection_string = Environment.GetEnvironmentVariable("storageconnectionstring");
+            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(storage_connection_string);
             CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
             IRetryPolicy exponentialRetryPolicy = new ExponentialRetry(TimeSpan.FromSeconds(2), 10);
             blobClient.DefaultRequestOptions.RetryPolicy = exponentialRetryPolicy;
@@ -116,7 +116,7 @@ namespace AzPerf
             try
             {
                 // Call the UploadFilesAsync function.
-                // UploadFilesAsync().Wait();
+                UploadFilesAsync().Wait();
 
                 // Uncomment the following line to enable downloading of files from the storage account.  This is commented out
                 // initially to support the tutorial at https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-scaleable-app-download-files.
