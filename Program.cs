@@ -60,7 +60,7 @@ namespace AzPerf
     {
 
         // Lowercase letters to use when creating containers
-        public const string LowerCaseAlphabet = "abcdefghijklmnopqrstuvwyxz";
+        public const string LowerCaseAlphabet = "abcdefghijklmnopqrstuvwxyz";
 
         // Helper method to retrieve retrieve the CloudBlobClient object in order to interact with the storage account
         // The method reads an environment variable that is used to store the connection string to the storage account.
@@ -96,7 +96,7 @@ namespace AzPerf
             CloudBlobContainer[] blobContainers = new CloudBlobContainer[5];
             for (int i = 0; i < blobContainers.Length; i++)
             {
-                blobContainers[i] = blobClient.GetContainerReference(GenerateString(5, new Random((int)DateTime.Now.Ticks), LowerCaseAlphabet));
+                blobContainers[i] = blobClient.GetContainerReference(System.Guid.NewGuid().ToString());
                 try
                 {
                     await blobContainers[i].CreateIfNotExistsAsync();
@@ -127,7 +127,7 @@ namespace AzPerf
 
                 // Uncomment the following line to enable downloading of files from the storage account.  This is commented out
                 // initially to support the tutorial at https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-scaleable-app-download-files.
-                // DownloadFilesAsync().GetAwaiter().GetResult();
+                DownloadFilesAsync().GetAwaiter().GetResult();
             }
             catch (Exception ex)
             {
@@ -137,22 +137,10 @@ namespace AzPerf
             {
                 // The following function will delete the container and all files contained in them.  This is commented out initialy
                 // As the tutorial at https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-scaleable-app-download-files has you upload only for one tutorial and download for the other. 
-                // DeleteExistingContainersAsync().GetAwaiter().GetResult();
+             DeleteExistingContainersAsync().GetAwaiter().GetResult();
                 Console.WriteLine("Press any key to exit the application");
                 Console.ReadKey();
             }
-        }
-
-        // Generate a random string of characters to use for creating storage containrs.
-        private static string GenerateString(int size, Random rng, string alphabet)
-        {
-            char[] chars = new char[size];
-            for (int i = 0; i < size; i++)
-            {
-                chars[i] = alphabet[rng.Next(alphabet.Length)];
-            }
-
-            return new string(chars);
         }
 
         // An asynchronous task used to upload the files to the storage account. The task retrives the containers to be used to 
@@ -174,31 +162,37 @@ namespace AzPerf
                 int max_outstanding = 100;
                 int completed_count = 0;
 
-                // Create a new instance of the semaphore class to define the number of threads to use in the application.
-                Semaphore sem = new Semaphore(max_outstanding, max_outstanding);
+                // Define the BlobRequestionOptions on the upload.
+                // This includes defining an exponential retry policy to ensure that failed connections are retried with a backoff policy. As multiple large files are being uploaded
+                // large block sizes this can cause an issue if an exponential retry policy is not defined.  Additionally parallel operations are enabled with a thread count of 8
+                // This could be should be multiple of the number of cores that the machine has. Lastly MD5 hash validation is disabled for this example, this improves the upload speed.
+                BlobRequestOptions options = new BlobRequestOptions
+                {
+                    ParallelOperationThreadCount = 8,
+                    DisableContentMD5Validation = true,
+                    StoreBlobContentMD5 = false
+                };
+                // Create a new instance of the SemaphoreSLim class to define the number of threads to use in the application.
+                SemaphoreSlim sem = new SemaphoreSlim(max_outstanding, max_outstanding);
 
                 List<Task> tasks = new List<Task>();
                 Console.WriteLine("Found {0} file(s)", Directory.GetFiles(uploadPath).Count());
 
                 // Iterate through the files
-                foreach (string fileName in Directory.GetFiles(uploadPath))
+                foreach (string path in Directory.GetFiles(uploadPath))
                 {
                     // Create random file names and set the block size that is used for the upload.
                     var container = containers[count % 5];
-                    Random r = new Random((int)DateTime.Now.Ticks);
-                    string s = (r.Next() % 10000).ToString("X5");
-                    Console.WriteLine("Uploading {0} as {1} to container {2}.", fileName, s, container.Name);
-                    CloudBlockBlob blockBlob = container.GetBlockBlobReference(s);
+                    string fileName = Path.GetFileName(path);
+                    Console.WriteLine("Uploading {0} to container {1}.", path, container.Name);
+                    CloudBlockBlob blockBlob = container.GetBlockBlobReference(fileName);
 
                     // Set block size to 100MB.
                     blockBlob.StreamWriteSizeInBytes = 100 * 1024 * 1024;
-                    sem.WaitOne();
+                    await sem.WaitAsync();
 
-                    // Create tasks for each file that is uploaded. This is added to a collection that executes them all asyncronously.  Defined the BlobRequestionOptions on the upload.
-                    // This includes defining an exponential retry policy to ensure that failed connections are retried with a backoff policy. As multiple large files are being uploaded
-                    // large block sizes this can cause an issue if an exponential retry policy is not defined.  Additionally parallel operations are enabled with a thread count of 8
-                    // This could be should be multiple of the number of cores that the machine has. Lastly MD5 hash validation is disabled for this example, this improves the upload speed.
-                    tasks.Add(blockBlob.UploadFromFileAsync(fileName, null, new BlobRequestOptions() { ParallelOperationThreadCount = 8, DisableContentMD5Validation = true, StoreBlobContentMD5 = false }, null).ContinueWith((t) =>
+                    // Create tasks for each file that is uploaded. This is added to a collection that executes them all asyncronously.  
+                    tasks.Add(blockBlob.UploadFromFileAsync(path, null, options, null).ContinueWith((t) =>
                     {
                         sem.Release();
                         Interlocked.Increment(ref completed_count);
@@ -231,6 +225,13 @@ namespace AzPerf
         {
             CloudBlobClient blobClient = GetCloudBlobClient();
 
+            // Define the BlobRequestionOptions on the download, including disabling MD5 hash validation for this example, this improves the download speed.
+            BlobRequestOptions options = new BlobRequestOptions
+            {
+                DisableContentMD5Validation = true,
+                StoreBlobContentMD5 = false
+            };
+
             // Retrieve the list of containers in the storage account.  Create a directory and configure variables for use later.
             BlobContinuationToken continuationToken = null;
             List<CloudBlobContainer> containers = new List<CloudBlobContainer>();
@@ -250,38 +251,49 @@ namespace AzPerf
             try
             {
                 List<Task> tasks = new List<Task>();
+                int max_outstanding = 100;
+                int completed_count = 0;
 
-                    // Iterate throung the containers
-                    foreach (CloudBlobContainer container in containers)
+                // Create a new instance of the SemaphoreSLim class to define the number of threads to use in the application.
+                SemaphoreSlim sem = new SemaphoreSlim(max_outstanding, max_outstanding);
+
+                // Iterate throung the containers
+                foreach (CloudBlobContainer container in containers)
+                {
+                    do
                     {
-                        do
+                        // Return the blobs from the container lazily 10 at a time.
+                        resultSegment = await container.ListBlobsSegmentedAsync(null, true, BlobListingDetails.All, 10, continuationToken, null, null);
+                        continuationToken = resultSegment.ContinuationToken;
                         {
-                            // Return the blobs from the container lazily 10 at a time.
-                            resultSegment = await container.ListBlobsSegmentedAsync(null, true, BlobListingDetails.All, 10, continuationToken, null, null);
-                            continuationToken = resultSegment.ContinuationToken;
+                            foreach (var blobItem in resultSegment.Results)
                             {
-                                foreach (var blobItem in resultSegment.Results)
-                                {
 
-                                    if (((CloudBlob)blobItem).Properties.BlobType == BlobType.BlockBlob)
+                                if (((CloudBlob)blobItem).Properties.BlobType == BlobType.BlockBlob)
+                                {
+                                    // Get the blob and add a task to download the blob asynchronously from the storage account.
+                                    CloudBlockBlob blockBlob = container.GetBlockBlobReference(((CloudBlockBlob)blobItem).Name);
+                                    Console.WriteLine("Downloading {0} from container {1}", blockBlob.Name, container.Name);
+                                    await sem.WaitAsync();
+                                    tasks.Add(blockBlob.DownloadToFileAsync(directory.FullName + "\\" + blockBlob.Name, FileMode.Create, null, options, null).ContinueWith((t) =>
                                     {
-                                        // Get the blob and add a task to download the blob asynchronously from the storage account.
-                                        CloudBlockBlob blockBlob = container.GetBlockBlobReference(((CloudBlockBlob)blobItem).Name);
-                                        Console.WriteLine("Downloading {0} from container {1}", blockBlob.Name, container.Name);
-                                        tasks.Add(blockBlob.DownloadToFileAsync(directory.FullName + "\\" + blockBlob.Name, FileMode.Create, null, new BlobRequestOptions() { DisableContentMD5Validation = true, StoreBlobContentMD5 = false }, null));
-                                    }
+                                        sem.Release();
+                                        Interlocked.Increment(ref completed_count);
+                                    }));
+
                                 }
                             }
                         }
-                        while (continuationToken != null);
                     }
+                    while (continuationToken != null);
+                }
 
-                    // Creates an asynchonous task that completes when all the downloads complete.
-                    await Task.WhenAll(tasks);
+                // Creates an asynchonous task that completes when all the downloads complete.
+                await Task.WhenAll(tasks);
             }
             catch (Exception e)
             {
-                Console.WriteLine("\nThe transfer is canceled: {0}", e.Message);
+                Console.WriteLine("\nError encountered during transfer: {0}", e.Message);
             }
 
             time.Stop();
