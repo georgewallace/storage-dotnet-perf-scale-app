@@ -58,10 +58,6 @@ namespace AzPerf
 
     public class Program
     {
-
-        // Lowercase letters to use when creating containers
-        public const string LowerCaseAlphabet = "abcdefghijklmnopqrstuvwxyz";
-
         // Helper method to retrieve retrieve the CloudBlobClient object in order to interact with the storage account
         // The method reads an environment variable that is used to store the connection string to the storage account.
         // The retry policy on the CloudBlobClient object is set to an Exponential retry policy with a back off of 2 seconds
@@ -211,7 +207,7 @@ namespace AzPerf
             }
             catch (DirectoryNotFoundException ex)
             {
-                Console.WriteLine("Error parsing files in the directory: {0}",ex.Message);
+                Console.WriteLine("Error parsing files in the directory: {0}", ex.Message);
             }
             catch (Exception ex)
             {
