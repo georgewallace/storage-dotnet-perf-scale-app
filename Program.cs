@@ -76,11 +76,19 @@ namespace AzPerf
                     "Add a environment variable name 'storageconnectionstring' with the actual storage " +
                     "connection string as a value.");
             }
+            try
+            { 
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse(storageConnectionString);
             CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
             IRetryPolicy exponentialRetryPolicy = new ExponentialRetry(TimeSpan.FromSeconds(2), 10);
             blobClient.DefaultRequestOptions.RetryPolicy = exponentialRetryPolicy;
             return blobClient;
+            }
+            catch (StorageException ex)
+            {
+                Console.WriteLine("Error returned from the service: {0}", ex.Message);
+                throw;
+            }
         }
 
         // This Asynchonrous task is used to create random containers with the storage account. These containers 
@@ -113,7 +121,7 @@ namespace AzPerf
             Console.WriteLine("Azure Blob storage performance and scalability sample");
             // Set threading and default connection limit to 100 to ensure multiple threads and connections can be opened.
             // This is in addition to parallelism with the storage client library that is defined in the functions below.
-            ThreadPool.SetMinThreads(100, 4);
+            ThreadPool.SetMinThreads(50, 16);
             ServicePointManager.DefaultConnectionLimit = 100; // (Or More)
             try
             {
@@ -167,7 +175,7 @@ namespace AzPerf
                     DisableContentMD5Validation = true,
                     StoreBlobContentMD5 = false
                 };
-                // Create a new instance of the SemaphoreSLim class to define the number of threads to use in the application.
+                // Create a new instance of the SemaphoreSlim class to define the number of threads to use in the application.
                 SemaphoreSlim sem = new SemaphoreSlim(max_outstanding, max_outstanding);
 
                 List<Task> tasks = new List<Task>();
@@ -249,7 +257,7 @@ namespace AzPerf
                 int max_outstanding = 100;
                 int completed_count = 0;
 
-                // Create a new instance of the SemaphoreSLim class to define the number of threads to use in the application.
+                // Create a new instance of the SemaphoreSlim class to define the number of threads to use in the application.
                 SemaphoreSlim sem = new SemaphoreSlim(max_outstanding, max_outstanding);
 
                 // Iterate throung the containers
