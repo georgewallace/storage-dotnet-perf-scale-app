@@ -72,8 +72,8 @@ namespace AzPerf
             // in an environment variable on the machine running the application called storageconnectionstring.
             // If the environment variable is created after the application is launched in a console or with Visual
             // studio the shell needs to be closed and reloaded to take the environment variable into account.
-            string storage_connection_string = Environment.GetEnvironmentVariable("storageconnectionstring");
-            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(storage_connection_string);
+            string storageConnectionString = Environment.GetEnvironmentVariable("storageconnectionstring");
+            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(storageConnectionString);
             CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
             IRetryPolicy exponentialRetryPolicy = new ExponentialRetry(TimeSpan.FromSeconds(2), 10);
             blobClient.DefaultRequestOptions.RetryPolicy = exponentialRetryPolicy;
@@ -116,33 +116,21 @@ namespace AzPerf
             try
             {
                 // Call the UploadFilesAsync function.
-                UploadFilesAsync().Wait();
+                UploadFilesAsync().GetAwaiter().GetResult();
 
                 // Uncomment the following line to enable downloading of files from the storage account.  This is commented out
                 // initially to support the tutorial at https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-scaleable-app-download-files.
-                // DownloadFilesAsync().Wait();
+                // DownloadFilesAsync().GetAwaiter().GetResult();
             }
-            catch (AggregateException ae)
+            catch (Exception ex)
             {
-                ae.Handle((x) =>
-                {
-                    if (x is ArgumentNullException) // This we know how to handle.
-                    {
-                        Console.WriteLine("A connection string has not been defined in the system environment variables. Add a environment variable name 'storageconnectionstring' with the actual storage connection string as a value.");
-                    }
-                    else
-                    {
-                        Console.WriteLine(x.Message);
-                    }
-
-                    return true;
-                });
+                Console.WriteLine(ex.Message);
             }
             finally
             {
                 // The following function will delete the container and all files contained in them.  This is commented out initialy
                 // As the tutorial at https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-scaleable-app-download-files has you upload only for one tutorial and download for the other. 
-                // DeleteExistingContainersAsync().Wait();
+                // DeleteExistingContainersAsync().GetAwaiter().GetResult();
                 Console.WriteLine("Application complete. Press any key to exit");
                 Console.ReadKey();
             }
