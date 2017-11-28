@@ -18,7 +18,7 @@ This is an <a href="http://azure.microsoft.com/en-us/services/storage/">Azure st
 `cd d:\git\storage-dotnet-perf-scale-app`
 4. Run the application to upload the files to Azure Storage from the folder
 `dotnet run`
-5. By default the download and delete capabilities are commented out.  To run them uncomment the `// DownloadFilesAsync().Wait();` and `// DeleteExistingContainersAsync().Wait();` lines for in the Main method.
+5. By default the download and delete capabilities are commented out.  To run them uncomment the `// DownloadFilesAsync().GetAwaiter().GetResult();` and `// DeleteExistingContainersAsync().GetAwaiter().GetResult();` lines for in the Main method.
 6. Re-build the application by running `dotnet build`.
 7. Re-run the application by running `dotnet run`
 
