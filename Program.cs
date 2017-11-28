@@ -84,8 +84,7 @@ namespace AzPerf
         }
 
         // This Asynchonrous task is used to create random containers with the storage account. These containers 
-        // are made up of a combination of 5 lowercase letters based on the current time. A collection of 
-        // CloudBlobContainers is returned from this helper task to the caller.
+        // are made up Guids. A collection of CloudBlobContainers is returned from this helper task to the caller.
         public static async Task<CloudBlobContainer[]> GetRandomContainersAsync()
         {
             CloudBlobClient blobClient = GetCloudBlobClient();
