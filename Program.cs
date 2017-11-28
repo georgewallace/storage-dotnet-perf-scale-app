@@ -127,7 +127,7 @@ namespace AzPerf
 
                 // Uncomment the following line to enable downloading of files from the storage account.  This is commented out
                 // initially to support the tutorial at https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-scaleable-app-download-files.
-                DownloadFilesAsync().GetAwaiter().GetResult();
+                // DownloadFilesAsync().GetAwaiter().GetResult();
             }
             catch (Exception ex)
             {
@@ -137,7 +137,7 @@ namespace AzPerf
             {
                 // The following function will delete the container and all files contained in them.  This is commented out initialy
                 // As the tutorial at https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-scaleable-app-download-files has you upload only for one tutorial and download for the other. 
-             DeleteExistingContainersAsync().GetAwaiter().GetResult();
+                // DeleteExistingContainersAsync().GetAwaiter().GetResult();
                 Console.WriteLine("Press any key to exit the application");
                 Console.ReadKey();
             }
