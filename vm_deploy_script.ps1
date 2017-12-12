@@ -72,7 +72,7 @@ New-AzureRmVM -ResourceGroupName $resourcegroup -Location $location -VM $vmConfi
 Set-AzureRMVMCustomScriptExtension -ResourceGroupName $resourcegroup `
     -VMName myVM `
     -Location $location `
-    -FileUri https://raw.githubusercontent.com/georgewallace/storage-dotnet-perf-scale-app/master/setup_env.ps1 `
+    -FileUri https://raw.githubusercontent.com/azure-samples/storage-dotnet-perf-scale-app/master/setup_env.ps1 `
     -Run 'setup_env.ps1' `
     -Name DemoScriptExtension `
     -Argument "$($storageaccount.StorageAccountName) $storagekey" 

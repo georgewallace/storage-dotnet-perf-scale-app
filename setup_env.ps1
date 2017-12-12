@@ -42,7 +42,7 @@ choco install git -y
 New-Item -ItemType Directory -Path D:\git -Force
 Set-Location D:\git
 Write-host "cloning repo"
-& 'C:\Program Files\git\cmd\git.exe' clone https://github.com/georgewallace/storage-dotnet-perf-scale-app
+& 'C:\Program Files\git\cmd\git.exe' clone https://github.com/azure-samples/storage-dotnet-perf-scale-app
 
 write-host "Changing directory to $((Get-Item -Path ".\" -Verbose).FullName)"
 Set-Location D:\git\storage-dotnet-perf-scale-app
