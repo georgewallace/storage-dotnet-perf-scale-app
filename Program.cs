@@ -91,8 +91,8 @@ namespace AzPerf
             }
         }
 
-        // This Asynchonrous task is used to create random containers with the storage account. These containers 
-        // are made up Guids. A collection of CloudBlobContainers is returned from this helper task to the caller.
+        // This Asynchronous task is used to create random containers with the storage account.
+        // A collection of CloudBlobContainers is returned from this helper task to the caller.
         public static async Task<CloudBlobContainer[]> GetRandomContainersAsync()
         {
             CloudBlobClient blobClient = GetCloudBlobClient();
@@ -121,8 +121,10 @@ namespace AzPerf
             Console.WriteLine("Azure Blob storage performance and scalability sample");
             // Set threading and default connection limit to 100 to ensure multiple threads and connections can be opened.
             // This is in addition to parallelism with the storage client library that is defined in the functions below.
-            ThreadPool.SetMinThreads(50, 16);
+            ThreadPool.SetMinThreads(100, 4);
             ServicePointManager.DefaultConnectionLimit = 100; // (Or More)
+
+            bool exception = false;
             try
             {
                 // Call the UploadFilesAsync function.
@@ -135,12 +137,16 @@ namespace AzPerf
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                exception = true;
             }
             finally
             {
                 // The following function will delete the container and all files contained in them.  This is commented out initialy
                 // As the tutorial at https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-scaleable-app-download-files has you upload only for one tutorial and download for the other. 
-                // DeleteExistingContainersAsync().GetAwaiter().GetResult();
+                if (!exception)
+                {
+                    // DeleteExistingContainersAsync().GetAwaiter().GetResult();
+                }
                 Console.WriteLine("Press any key to exit the application");
                 Console.ReadKey();
             }
@@ -203,7 +209,7 @@ namespace AzPerf
                     count++;
                 }
 
-                // Creates an asynchonous task that completes when all the uploads complete.
+                // Creates an asynchronous task that completes when all the uploads complete.
                 await Task.WhenAll(tasks);
 
                 time.Stop();
@@ -250,7 +256,7 @@ namespace AzPerf
             BlobResultSegment resultSegment = null;
             Stopwatch time = Stopwatch.StartNew();
 
-            // download the blobs
+            // Download the blobs
             try
             {
                 List<Task> tasks = new List<Task>();
@@ -260,7 +266,7 @@ namespace AzPerf
                 // Create a new instance of the SemaphoreSlim class to define the number of threads to use in the application.
                 SemaphoreSlim sem = new SemaphoreSlim(max_outstanding, max_outstanding);
 
-                // Iterate throung the containers
+                // Iterate through the containers
                 foreach (CloudBlobContainer container in containers)
                 {
                     do
@@ -291,7 +297,7 @@ namespace AzPerf
                     while (continuationToken != null);
                 }
 
-                // Creates an asynchonous task that completes when all the downloads complete.
+                // Creates an asynchronous task that completes when all the downloads complete.
                 await Task.WhenAll(tasks);
             }
             catch (Exception e)
